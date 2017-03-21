@@ -45,7 +45,7 @@ setup(
     },
     zip_safe=False,
     dependency_links=(
-        "git+https://github.com/genialis/resolwe.git@master#egg=resolwe-master",
+        "git+https://github.com/tjanez/resolwe.git@upload-dir-issue#egg=resolwe-master",
     ),
     install_requires=(
         'Django~=1.10.5',
