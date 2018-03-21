@@ -1,0 +1,92 @@
+# ===============================
+# Import - Sample Annotation
+# ===============================
+---
+
+- slug: upload-annotation
+  name: Sample Annotation
+  requirements:
+    expression-engine: jinja
+    executor:
+      docker:
+        image: resolwebio/rnaseq:3.0.0
+    resources:
+      network: true
+  data_name: '{{ src.file|default("?") }}'
+  version: 0.0.1
+  type: data:annotation:xls
+  category: upload
+  persistence: RAW
+  description: >
+    Upload annotation in XLS or TSV format
+  input:
+    - name: src
+      label: Annotation (GFF3)
+      type: basic:file
+      description: >
+        Annotation in GFF3 format. Supported extensions are: .gff, .gff3 and .gtf
+      validate_regex: '\.(gff|gff3|gtf)(|\.gz|\.bz2|\.tgz|\.tar\.gz|\.tar\.bz2|\.zip|\.rar|\.7z)$'
+    - name: source
+      label: Gene ID database
+      type: basic:string
+      allow_custom_choice: true
+      choices:
+        - label: AFFY
+          value: AFFY
+        - label: DICTYBASE
+          value: DICTYBASE
+        - label: ENSEMBL
+          value: ENSEMBL
+        - label: NCBI
+          value: NCBI
+        - label: UCSC
+          value: UCSC
+    - name: species
+      label: Species
+      type: basic:string
+      description: >
+        Species latin name.
+      allow_custom_choice: true
+      choices:
+        - label: Homo sapiens
+          value: Homo sapiens
+        - label: Mus musculus
+          value: Mus musculus
+        - label: Rattus norvegicus
+          value: Rattus norvegicus
+        - label: Dictyostelium discoideum
+          value: Dictyostelium discoideum
+        - label: Odocoileus virginianus texanus
+          value: Odocoileus virginianus texanus
+        - label: Solanum tuberosum
+          value: Solanum tuberosum
+    - name: build
+      label: Build
+      type: basic:string
+  output:
+    - name: annot
+      label: Uploaded file
+      type: basic:file
+    - name: source
+      label: Gene ID database
+      type: basic:string
+    - name: species
+      label: Species
+      type: basic:string
+    - name: build
+      label: Build
+      type: basic:string
+  run:
+    runtime: polyglot
+    language: bash
+    program: |
+      re-import {{ src.file_temp }} {{ src.file }} "gff|gff3|gtf" "gff" 0.1
+
+      gt gff3validator "${NAME}.gff"
+      re-checkrc
+      re-progress 0.2
+      re-save-file annot "${NAME}.gff"
+      re-save source {{ source }}
+      re-save species {{ species }}
+      re-save build {{ build }}
+
